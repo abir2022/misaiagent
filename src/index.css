@@ -1,0 +1,160 @@
+/* index.css - Global styles for MIS AI Agent */
+
+/* CSS Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, hsl(210, 30%, 12%), hsl(210, 30%, 6%));
+  color: #e0e0e0;
+  overflow: hidden;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  padding: 2rem;
+}
+
+.app-header {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+  margin-bottom: 2rem;
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.search-form {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: background 0.3s ease;
+}
+
+.search-input::placeholder {
+  color: #bbbbbb;
+}
+
+.search-input:focus {
+  background: rgba(255,255,255,0.18);
+}
+
+.search-button {
+  padding: 0.75rem 1.2rem;
+  background: hsl(210, 50%, 48%);
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.search-button:hover {
+  background: hsl(210, 50%, 58%);
+}
+
+.results-section {
+  width: 100%;
+  max-width: 800px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.result-card {
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease;
+}
+
+.result-card:hover {
+  transform: translateY(-4px);
+}
+
+.result-card h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  color: #e0e0ff;
+}
+
+.result-card p {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #d0d0d0;
+}
+
+.placeholder-text {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #aaaaaa;
+  font-style: italic;
+}
+
+/* Spinner overlay */
+.spinner-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top-color: hsl(210, 80%, 60%);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
