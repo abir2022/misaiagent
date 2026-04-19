@@ -16,43 +16,46 @@ function App() {
       const { createClient } = await import('@supabase/supabase-js');
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const groqKey = import.meta.env.VITE_GROQ_API_KEY;
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-      // Search in teachers
-      const { data: teachers } = await supabase
-        .from('teachers')
-        .select('*')
-        .ilike('name', `%${query}%`);
+      // 1. Fetch Context from Supabase
+      const { data: teachers } = await supabase.from('teachers').select('*').ilike('name', `%${query}%`).limit(3);
+      const { data: programs } = await supabase.from('programs').select('*').ilike('title', `%${query}%`).limit(2);
 
-      // Search in programs
-      const { data: programs } = await supabase
-        .from('programs')
-        .select('*')
-        .ilike('title', `%${query}%`);
+      const context = `
+        Teachers: ${teachers?.map(t => `${t.name} (${t.designation})`).join(', ')}
+        Programs: ${programs?.map(p => `${p.title}: ${p.overview}`).join('; ')}
+      `;
 
-      const allResults = [
-        ...(teachers || []).map(t => ({ 
-          title: t.name, 
-          content: t.designation, 
-          image: t.image_url, 
-          link: t.profile_url 
-        })),
-        ...(programs || []).map(p => ({ 
-          title: p.title, 
-          content: p.overview, 
-          image: null, 
-          link: p.program_url 
-        }))
-      ];
+      // 2. Call Groq AI
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${groqKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'llama3-8b-8192',
+          messages: [
+            { role: 'system', content: 'You are an AI assistant for the MIS Department of Dhaka University. Use the provided context to answer the user query. Be professional and helpful.' },
+            { role: 'user', content: `Context: ${context}\n\nUser Question: ${query}` }
+          ]
+        })
+      });
 
-      if (allResults.length > 0) {
-        setResults(allResults);
-      } else {
-        setResults([{ title: 'No Results', content: `No matches found for "${query}".` }]);
-      }
+      const aiData = await response.json();
+      const aiAnswer = aiData.choices[0]?.message?.content || "I couldn't find a specific answer, but here is what I found in the records.";
+
+      setResults([{ 
+        title: 'AI Agent Response', 
+        content: aiAnswer,
+        isAI: true 
+      }]);
+
     } catch (error) {
       console.error('Search error:', error);
-      setResults([{ title: 'Error', content: 'Connection failed.' }]);
+      setResults([{ title: 'Error', content: 'AI Brain is offline. Check your Groq key.' }]);
     } finally {
       setLoading(false);
     }
