@@ -73,32 +73,44 @@ async function scrapeMIS() {
     const { error: tError } = await supabase.from('teachers').upsert(teachers, { onConflict: 'name' });
     if (tError) console.error("❌ Error uploading teachers:", tError.message);
 
-    // 3. Scrape Programs (Example link)
-    console.log("📑 Scraping programs...");
-    const programUrl = 'https://www.du.ac.bd/programDetails/MIS';
-    const { data: pHtml } = await axios.get(programUrl);
-    const $p = cheerio.load(pHtml);
-    
+    // 3. Scrape Programs (Detailed)
+    console.log("📑 Scraping detailed program summaries...");
+    const programLinks = [
+      { title: 'Bachelor of Business Administration (BBA)', id: '343' },
+      { title: 'Master of Business Administration (MBA)', id: '344' },
+      { title: 'Master of Professional MIS (MPMIS)', id: '516' },
+      { title: 'Executive MBA', id: '345' },
+      { title: 'M.Phil', id: '346' },
+      { title: 'PhD', id: '347' }
+    ];
+
     const programs = [];
-    $p('.program-card, .program-item').each((_, el) => {
-      const title = $p(el).find('h4, .program-title').text().trim();
-      const overview = $p(el).find('.program-overview, p').first().text().trim();
-      if (title) {
+    for (const link of programLinks) {
+      try {
+        const pUrl = `https://www.du.ac.bd/programDetails/MIS/${link.id}`;
+        const { data: pHtml } = await axios.get(pUrl);
+        const $p = cheerio.load(pHtml);
+        
+        // Extracting summary from the page - usually in a specific div or first few paragraphs
+        const overview = $p('.program-details, .content-area').text().trim() || $p('p').first().text().trim();
+        
         programs.push({
           department_id: deptId,
-          title,
-          overview: overview.substring(0, 500),
-          program_url: programUrl
+          title: link.title,
+          overview: overview.substring(0, 2000), // Get a long summary
+          program_url: pUrl
         });
+        console.log(`✅ Scraped ${link.title}`);
+      } catch (e) {
+        console.error(`❌ Failed to scrape ${link.title}`);
       }
-    });
+    }
 
     if (programs.length > 0) {
-      console.log(`✅ Found ${programs.length} programs. Uploading...`);
       await supabase.from('programs').upsert(programs, { onConflict: 'title' });
     }
 
-    console.log("🎉 Scraping complete! Your agent is now ready.");
+    console.log("🎉 Detailed Scraping complete!");
 
   } catch (error) {
     console.error("❌ Scraper failed:", error.message);

@@ -31,18 +31,28 @@ function App() {
         .ilike('title', `%${query}%`);
 
       const allResults = [
-        ...(teachers || []).map(t => ({ title: t.name, content: `${t.designation} - ${t.profile_url}` })),
-        ...(programs || []).map(p => ({ title: p.title, content: p.overview }))
+        ...(teachers || []).map(t => ({ 
+          title: t.name, 
+          content: t.designation, 
+          image: t.image_url, 
+          link: t.profile_url 
+        })),
+        ...(programs || []).map(p => ({ 
+          title: p.title, 
+          content: p.overview, 
+          image: null, 
+          link: p.program_url 
+        }))
       ];
 
       if (allResults.length > 0) {
         setResults(allResults);
       } else {
-        setResults([{ title: 'No Results', content: `No matches found for "${query}". Try searching for a teacher or a program.` }]);
+        setResults([{ title: 'No Results', content: `No matches found for "${query}".` }]);
       }
     } catch (error) {
       console.error('Search error:', error);
-      setResults([{ title: 'Error', content: 'Could not connect to the database. Check your .env keys.' }]);
+      setResults([{ title: 'Error', content: 'Connection failed.' }]);
     } finally {
       setLoading(false);
     }
@@ -79,8 +89,12 @@ function App() {
           ) : (
             results.map((item, idx) => (
               <div key={idx} className="result-card glass">
-                <h3>{item.title}</h3>
-                <p>{item.content}</p>
+                <div className="result-header">
+                  {item.image && <img src={item.image} alt={item.title} className="result-thumb" />}
+                  <h3>{item.title}</h3>
+                </div>
+                <p className="result-content">{item.content}</p>
+                {item.link && <a href={item.link} target="_blank" rel="noreferrer" className="result-link">View Details →</a>}
               </div>
             ))
           )}
