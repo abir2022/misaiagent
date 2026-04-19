@@ -36,7 +36,7 @@ function App() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama3-8b-8192',
+          model: 'llama-3.3-70b-versatile',
           messages: [
             { role: 'system', content: 'You are an AI assistant for the MIS Department of Dhaka University. Use the provided context to answer the user query. Be professional and helpful.' },
             { role: 'user', content: `Context: ${context}\n\nUser Question: ${query}` }
