@@ -44,8 +44,13 @@ function App() {
         })
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Groq API Error: ${errorData.error?.message || response.statusText}`);
+      }
+
       const aiData = await response.json();
-      const aiAnswer = aiData.choices[0]?.message?.content || "I couldn't find a specific answer, but here is what I found in the records.";
+      const aiAnswer = aiData.choices && aiData.choices[0] ? aiData.choices[0].message.content : "No answer generated.";
 
       setResults([{ 
         title: 'AI Agent Response', 
@@ -55,7 +60,10 @@ function App() {
 
     } catch (error) {
       console.error('Search error:', error);
-      setResults([{ title: 'Error', content: 'AI Brain is offline. Check your Groq key.' }]);
+      setResults([{ 
+        title: 'Error', 
+        content: `AI Brain Error: ${error.message}. Please check your API keys and restart the server.` 
+      }]);
     } finally {
       setLoading(false);
     }
