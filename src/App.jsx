@@ -11,10 +11,41 @@ function App() {
     e.preventDefault();
     if (!query.trim()) return;
     setLoading(true);
-    // TODO: replace with real Supabase edge function
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setResults([{ title: 'You searched for', content: query }]);
-    setLoading(false);
+
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+      // Search in teachers
+      const { data: teachers } = await supabase
+        .from('teachers')
+        .select('*')
+        .ilike('name', `%${query}%`);
+
+      // Search in programs
+      const { data: programs } = await supabase
+        .from('programs')
+        .select('*')
+        .ilike('title', `%${query}%`);
+
+      const allResults = [
+        ...(teachers || []).map(t => ({ title: t.name, content: `${t.designation} - ${t.profile_url}` })),
+        ...(programs || []).map(p => ({ title: p.title, content: p.overview }))
+      ];
+
+      if (allResults.length > 0) {
+        setResults(allResults);
+      } else {
+        setResults([{ title: 'No Results', content: `No matches found for "${query}". Try searching for a teacher or a program.` }]);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      setResults([{ title: 'Error', content: 'Could not connect to the database. Check your .env keys.' }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
