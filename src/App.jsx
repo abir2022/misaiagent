@@ -65,14 +65,16 @@ function App() {
           - Designation: ${t.designation || 'N/A'}
           - Image URL: ${t.image_url || ''}
           - Profile URL: ${t.profile_url || ''}
-          - Phone: ${t.metadata?.phone || 'N/A'}
-          - Email: ${t.metadata?.email || 'N/A'}
-          - Google Scholar: ${t.metadata?.scholar || 'N/A'}
-          - ORCID: ${t.metadata?.orcid || 'N/A'}
-          - Research Interests: ${t.metadata?.research?.substring(0, 400) || 'N/A'}
+          return `
+          - Name: ${t.name}
+          - Designation: ${t.designation || 'N/A'}
+          - Image URL: ${t.image_url || ''}
+          - Profile URL: ${t.profile_url || ''}
+          - Contact: ${t.metadata?.email || ''} ${t.metadata?.phone || ''}
+          - Research: ${t.metadata?.research?.substring(0, 300) || 'N/A'}
           ${isMentioned ? `
-          - Full Publications: ${t.metadata?.publications?.substring(0, 2500) || 'N/A'}
-          - Full Biography: ${t.metadata?.bio?.substring(0, 1500) || 'N/A'}` : ''}
+          - Publications: ${t.metadata?.publications?.substring(0, 2000) || 'N/A'}
+          - Bio: ${t.metadata?.bio?.substring(0, 1000) || 'N/A'}` : ''}
           `;
         }).join('\n')}
 
@@ -114,8 +116,9 @@ CRITICAL INSTRUCTIONS:
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: apiMessages
+          model: 'llama-3.1-8b-instant',
+          messages: apiMessages,
+          temperature: 0.1
         })
       });
 
