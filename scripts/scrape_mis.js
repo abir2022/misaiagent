@@ -104,18 +104,30 @@ async function scrapeMIS() {
           const publications = $p('#publicationInfo').text().trim();
 
           let email = null;
-          $p('a[href^="mailto:"]').each((_, aEl) => {
-             const mailText = $p(aEl).text().trim();
-             if (mailText && !mailText.includes('chairman.mis')) {
-                email = mailText;
-             }
+          let phone = null;
+          
+          $p('#contactInfo div').each((_, divEl) => {
+             const text = $p(divEl).text().trim();
+             if (text.startsWith('Email:')) email = text.replace('Email:', '').trim();
+             if (text.startsWith('Phone:')) phone = text.replace('Phone:', '').trim();
           });
 
-          let phone = null;
-          const contactText = $p('.contact-info, .faculty-details, p').text();
-          const phoneMatches = contactText.match(/\\+88[0-9\\-\\s]+/g);
-          if (phoneMatches && phoneMatches[0] && !phoneMatches[0].includes('09666')) {
-             phone = phoneMatches[0].trim();
+          // Fallback if not found in specific labels
+          if (!email) {
+            $p('a[href^="mailto:"]').each((_, aEl) => {
+               const mailText = $p(aEl).text().trim();
+               if (mailText && !mailText.includes('chairman.mis')) {
+                  email = mailText;
+               }
+            });
+          }
+
+          const contactText = $p('#contactInfo, .faculty-details, p').text();
+          if (!phone) {
+            const phoneMatches = contactText.match(/\+88[0-9\-\s]+/g) || contactText.match(/01[0-9\-\s]{8,15}/g);
+            if (phoneMatches && phoneMatches[0] && !phoneMatches[0].includes('09666')) {
+               phone = phoneMatches[0].trim();
+            }
           }
 
           t.metadata = { 
