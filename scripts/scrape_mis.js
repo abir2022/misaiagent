@@ -92,7 +92,41 @@ async function scrapeMIS() {
              bioText = $p('p').first().text().trim();
           }
           
-          t.metadata = { bio: bioText.substring(0, 4000) };
+          let scholar = null;
+          let orcid = null;
+          $p('a').each((_, aEl) => {
+             const href = $p(aEl).attr('href');
+             if (href && href.includes('scholar.google')) scholar = href;
+             if (href && href.includes('orcid.org')) orcid = href;
+          });
+
+          const research = $p('#researchActivities').text().trim();
+          const publications = $p('#publicationInfo').text().trim();
+
+          let email = null;
+          $p('a[href^="mailto:"]').each((_, aEl) => {
+             const mailText = $p(aEl).text().trim();
+             if (mailText && !mailText.includes('chairman.mis')) {
+                email = mailText;
+             }
+          });
+
+          let phone = null;
+          const contactText = $p('.contact-info, .faculty-details, p').text();
+          const phoneMatches = contactText.match(/\\+88[0-9\\-\\s]+/g);
+          if (phoneMatches && phoneMatches[0] && !phoneMatches[0].includes('09666')) {
+             phone = phoneMatches[0].trim();
+          }
+
+          t.metadata = { 
+            bio: bioText.substring(0, 4000),
+            scholar: scholar,
+            orcid: orcid,
+            research: research ? research.substring(0, 2000) : null,
+            publications: publications ? publications.substring(0, 3000) : null,
+            email: email,
+            phone: phone
+          };
           console.log(`✅ Scraped full profile for ${t.name}`);
         } catch (e) {
           console.log(`❌ Failed to scrape profile for ${t.name}`);
