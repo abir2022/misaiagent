@@ -7,7 +7,16 @@ function App() {
   const [query, setQuery] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const chatEndRef = useRef(null);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.remove('light-mode');
+    } else {
+      document.body.classList.add('light-mode');
+    }
+  }, [isDarkMode]);
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -130,9 +139,25 @@ CRITICAL INSTRUCTIONS:
 
   return (
     <div className="app-container">
-      <header className="app-header glass">
-        <img src={logo} alt="DU Logo" className="logo" />
-        <h1 className="title">MIS AI Agent</h1>
+      {/* 3D Background Layer */}
+      <div className="background-3d">
+        <div className="floating-object" style={{ width: '300px', height: '300px', top: '10%', left: '5%', animationDelay: '0s' }}></div>
+        <div className="floating-object" style={{ width: '200px', height: '200px', bottom: '15%', right: '10%', animationDelay: '-5s', background: 'linear-gradient(45deg, #444, transparent)' }}></div>
+        <div className="floating-object" style={{ width: '150px', height: '150px', top: '40%', right: '20%', animationDelay: '-10s', opacity: 0.1 }}></div>
+      </div>
+
+      <header className="app-header">
+        <div className="header-left">
+          <img src={logo} alt="DU Logo" className="logo" />
+          <h1 className="title">MIS AI Agent</h1>
+        </div>
+        <button 
+          className="theme-toggle" 
+          onClick={() => setIsDarkMode(!isDarkMode)}
+          title="Toggle Theme"
+        >
+          {isDarkMode ? '🌙' : '☀️'}
+        </button>
       </header>
 
       <main className="app-main">
@@ -154,9 +179,12 @@ CRITICAL INSTRUCTIONS:
           )}
           {loading && (
             <div className="message-row ai">
-              <div className="message-bubble ai-message" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }} />
-                <span>Thinking...</span>
+              <div className="message-bubble ai-message">
+                <div className="typing-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
               </div>
             </div>
           )}
