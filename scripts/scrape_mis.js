@@ -64,10 +64,41 @@ async function scrapeMIS() {
           name,
           designation,
           profile_url: profileUrl ? (profileUrl.startsWith('http') ? profileUrl : `https://www.du.ac.bd${profileUrl}`) : null,
-          image_url: imageUrl ? (imageUrl.startsWith('http') ? imageUrl : `https://www.du.ac.bd${imageUrl}`) : null
+          image_url: imageUrl ? (imageUrl.startsWith('http') ? imageUrl : `https://www.du.ac.bd${imageUrl}`) : null,
+          metadata: {}
         });
       }
     });
+
+    console.log(`✅ Found ${teachers.length} teachers. Fetching full profiles...`);
+    
+    // Fetch individual profile pages
+    for (let t of teachers) {
+      if (t.profile_url) {
+        try {
+          const { data: profileHtml } = await axios.get(t.profile_url);
+          const $p = cheerio.load(profileHtml);
+          
+          let bioParts = [];
+          $p('.col-md-9 p, .col-md-9 li').each((_, el) => {
+             const text = $p(el).text().trim();
+             if (text && text.length > 20) {
+                 bioParts.push(text);
+             }
+          });
+          
+          let bioText = bioParts.join('\n');
+          if (!bioText) {
+             bioText = $p('p').first().text().trim();
+          }
+          
+          t.metadata = { bio: bioText.substring(0, 4000) };
+          console.log(`✅ Scraped full profile for ${t.name}`);
+        } catch (e) {
+          console.log(`❌ Failed to scrape profile for ${t.name}`);
+        }
+      }
+    }
 
     console.log(`✅ Found ${teachers.length} teachers. Uploading to Supabase...`);
     const { error: tError } = await supabase.from('teachers').upsert(teachers, { onConflict: 'name' });
@@ -91,13 +122,19 @@ async function scrapeMIS() {
         const { data: pHtml } = await axios.get(pUrl);
         const $p = cheerio.load(pHtml);
         
-        // Extracting summary from the page - usually in a specific div or first few paragraphs
-        const overview = $p('.program-details, .content-area').text().trim() || $p('p').first().text().trim();
+        // Extracting all meaningful text from the main container
+        let fullText = '';
+        $p('.col-md-9 p, .col-md-9 li, .col-md-9 h4, .col-md-9 h5, .col-md-9 td').each((_, el) => {
+           const text = $p(el).text().trim();
+           if (text && text.length > 5) {
+             fullText += text + '\n';
+           }
+        });
         
         programs.push({
           department_id: deptId,
           title: link.title,
-          overview: overview.substring(0, 2000), // Get a long summary
+          overview: fullText || $p('p').text().trim(), // Keep full text
           program_url: pUrl
         });
         console.log(`✅ Scraped ${link.title}`);
