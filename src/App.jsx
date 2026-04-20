@@ -40,32 +40,43 @@ function App() {
       const { data: teachers } = await supabase.from('teachers').select('*');
       const { data: programs } = await supabase.from('programs').select('*');
 
-      // 2. Format detailed context
+      // 2. Format detailed context intelligently (to stay under token limits)
+      const queryLower = currentQuery.toLowerCase();
       const context = `
         DEPARTMENT DATA
         Teachers:
-        ${teachers?.map(t => `
+        ${teachers?.map(t => {
+          // Check if this teacher is likely being asked about
+          const nameParts = t.name.toLowerCase().split(' ');
+          const isMentioned = queryLower.includes(t.name.toLowerCase()) || 
+                             nameParts.some(part => part.length > 3 && queryLower.includes(part));
+          
+          return `
           - Name: ${t.name}
           - Designation: ${t.designation || 'N/A'}
           - Image URL: ${t.image_url || ''}
           - Profile URL: ${t.profile_url || ''}
           - Phone: ${t.metadata?.phone || 'N/A'}
           - Email: ${t.metadata?.email || 'N/A'}
-          - Room: ${t.metadata?.room || 'N/A'}
           - Google Scholar: ${t.metadata?.scholar || 'N/A'}
           - ORCID: ${t.metadata?.orcid || 'N/A'}
-          - Research Interests: ${t.metadata?.research || 'N/A'}
-          - Publications: ${t.metadata?.publications || 'N/A'}
-          - Biography & Background: ${t.metadata?.bio || 'N/A'}
-        `).join('\n')}
+          - Research Interests: ${t.metadata?.research?.substring(0, 400) || 'N/A'}
+          ${isMentioned ? `
+          - Full Publications: ${t.metadata?.publications?.substring(0, 2500) || 'N/A'}
+          - Full Biography: ${t.metadata?.bio?.substring(0, 1500) || 'N/A'}` : ''}
+          `;
+        }).join('\n')}
 
         Programs:
-        ${programs?.map(p => `
+        ${programs?.map(p => {
+          const isProgMentioned = queryLower.includes(p.title.toLowerCase()) || 
+                                  queryLower.includes(p.title.split(' ')[0].toLowerCase());
+          return `
           - Title: ${p.title}
-          - Duration: ${p.duration || 'N/A'}
-          - Overview: ${p.overview || 'N/A'}
+          - Overview: ${isProgMentioned ? p.overview?.substring(0, 4000) : p.overview?.substring(0, 300) + '...'}
           - URL: ${p.program_url || ''}
-        `).join('\n')}
+          `;
+        }).join('\n')}
       `;
 
       // 3. System Prompt specifying Markdown usage and fuzzy matching
