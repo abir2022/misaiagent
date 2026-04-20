@@ -65,11 +65,6 @@ function App() {
           - Designation: ${t.designation || 'N/A'}
           - Image URL: ${t.image_url || ''}
           - Profile URL: ${t.profile_url || ''}
-          return `
-          - Name: ${t.name}
-          - Designation: ${t.designation || 'N/A'}
-          - Image URL: ${t.image_url || ''}
-          - Profile URL: ${t.profile_url || ''}
           - Contact: ${t.metadata?.email || ''} ${t.metadata?.phone || ''}
           - Research: ${t.metadata?.research?.substring(0, 300) || 'N/A'}
           ${isMentioned ? `
