@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import './index.css';
 import logo from '../DU logo.png';
 
@@ -34,24 +35,51 @@ function App() {
       const groqKey = import.meta.env.VITE_GROQ_API_KEY;
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-      // 1. Fetch Context from Supabase based on the current query
-      const { data: teachers } = await supabase.from('teachers').select('*').ilike('name', `%${currentQuery}%`).limit(3);
-      const { data: programs } = await supabase.from('programs').select('*').ilike('title', `%${currentQuery}%`).limit(2);
+      // 1. Fetch entire context (since dataset is small: ~28 teachers, ~6 programs)
+      // This allows the LLM to act as the ultimate search engine
+      const { data: teachers } = await supabase.from('teachers').select('*');
+      const { data: programs } = await supabase.from('programs').select('*');
 
+      // 2. Format detailed context
       const context = `
-        Teachers: ${teachers?.map(t => `${t.name} (${t.designation})`).join(', ')}
-        Programs: ${programs?.map(p => `${p.title}: ${p.overview}`).join('; ')}
+        DEPARTMENT DATA
+        Teachers:
+        ${teachers?.map(t => `
+          - Name: ${t.name}
+          - Designation: ${t.designation || 'N/A'}
+          - Image URL: ${t.image_url || ''}
+          - Profile URL: ${t.profile_url || ''}
+          - Phone: ${t.metadata?.phone || 'N/A'}
+          - Email: ${t.metadata?.email || 'N/A'}
+          - Room: ${t.metadata?.room || 'N/A'}
+        `).join('\n')}
+
+        Programs:
+        ${programs?.map(p => `
+          - Title: ${p.title}
+          - Duration: ${p.duration || 'N/A'}
+          - Overview: ${p.overview || 'N/A'}
+          - URL: ${p.program_url || ''}
+        `).join('\n')}
       `;
 
-      // 2. Prepare Messages for Groq API
-      // Only attach context to the latest user question behind the scenes
+      // 3. System Prompt specifying Markdown usage
+      const systemPrompt = `You are the official AI assistant for the Management Information Systems (MIS) Department of Dhaka University.
+Your job is to accurately answer user questions using ONLY the provided DEPARTMENT DATA context.
+CRITICAL INSTRUCTIONS:
+1. When a user asks about a specific person (teacher/faculty/staff), you MUST use Markdown to format their profile.
+2. If an Image URL is available for a person, display it exactly like this at the top of their profile: ![Profile Picture](Image URL)
+3. Include all available details cleanly (Phone, Email, Room, Profile link).
+4. If asked about programs, summarize them neatly with bullet points and bold text.
+5. Do not make up information that is not in the context. If you don't know, say so.`;
+
       const apiMessages = [
-        { role: 'system', content: 'You are an AI assistant for the MIS Department of Dhaka University. Use the provided context to answer the user query. Be professional and helpful.' },
+        { role: 'system', content: systemPrompt },
         ...chatHistory,
-        { role: 'user', content: `Context: ${context}\n\nUser Question: ${currentQuery}` }
+        { role: 'user', content: `Context:\n${context}\n\nUser Question: ${currentQuery}` }
       ];
 
-      // 3. Call Groq AI
+      // 4. Call Groq AI
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -97,7 +125,11 @@ function App() {
             chatHistory.map((msg, idx) => (
               <div key={idx} className={`message-row ${msg.role === 'user' ? 'user' : 'ai'}`}>
                 <div className={`message-bubble ${msg.role === 'user' ? 'user-message' : 'ai-message'}`}>
-                  {msg.content}
+                  {msg.role === 'user' ? (
+                    msg.content
+                  ) : (
+                    <ReactMarkdown className="markdown-content">{msg.content}</ReactMarkdown>
+                  )}
                 </div>
               </div>
             ))

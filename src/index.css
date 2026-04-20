@@ -159,6 +159,36 @@ html, body, #root {
   border-bottom-left-radius: 0.2rem;
 }
 
+.markdown-content {
+  white-space: normal;
+}
+.markdown-content img {
+  max-width: 150px;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 0.5rem 0;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  display: block;
+}
+.markdown-content a {
+  color: hsl(210, 80%, 70%);
+  text-decoration: none;
+  font-weight: 500;
+}
+.markdown-content a:hover {
+  text-decoration: underline;
+}
+.markdown-content p {
+  margin-bottom: 0.75rem;
+}
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+.markdown-content ul, .markdown-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
 .placeholder-text {
   flex: 1;
   display: flex;
