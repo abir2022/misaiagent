@@ -80,16 +80,17 @@ async function scrapeMIS() {
           const $p = cheerio.load(profileHtml);
           
           let bioParts = [];
-          $p('.col-md-9 p, .col-md-9 li').each((_, el) => {
+          // Target specifically the bio tab content and common containers
+          $p('#biographyInfo p, #biographyInfo li, .col-md-9 p, .col-md-9 li, .info.title div').each((_, el) => {
              const text = $p(el).text().trim();
-             if (text && text.length > 20) {
+             if (text && text.length > 5) {
                  bioParts.push(text);
              }
           });
           
           let bioText = bioParts.join('\n');
           if (!bioText) {
-             bioText = $p('p').first().text().trim();
+             bioText = $p('.info.title').text().trim() || $p('p').first().text().trim();
           }
           
           let scholar = null;
