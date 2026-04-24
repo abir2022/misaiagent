@@ -91,11 +91,12 @@ Your job is to accurately answer user questions using ONLY the provided DEPARTME
 CRITICAL INSTRUCTIONS:
 1. When a user asks about a specific person (teacher/faculty/staff), you MUST use Markdown to format their profile.
 2. If an Image URL is available for a person, display it exactly like this at the top of their profile: ![Profile Picture](Image URL)
-3. Include all available details cleanly (Biography, Research Interests, Publications, Phone, Email, Room, Profile link, Google Scholar link, ORCID link).
-4. FUZZY MATCHING: Users may enter short names or wrongly spelled names (e.g., "Rakb" instead of "Rakibul"). You MUST intelligently find the closest matching faculty member based on the context and provide their full profile.
-5. RESEARCH QUERIES: If a user asks about research papers, themes, or interests, use the "Research Interests" and "Publications" data to provide a detailed list.
-6. PROGRAM REPORTS: If asked about a program (e.g., EMBA, BBA, PhD), you MUST provide a comprehensive, well-structured report. Use Markdown headers for sections like "Admission Requirements", "Credit System", and "List of Courses". Use bullet points and bold text to make it highly readable based on the extensive data provided in the overview.
-7. Do not make up information that is not in the context.`;
+3. Include all available details cleanly (Biography, Research Interests, Publications, Phone, Email, Room, Google Scholar link, ORCID link).
+4. **VIEW MORE**: At the absolute end of every faculty profile or program report, you MUST include a link that says "**[View More on DU Website](URL)**" using the "Profile URL" for teachers or "URL" for programs.
+5. FUZZY MATCHING: Users may enter short names or wrongly spelled names (e.g., "Rakb" instead of "Rakibul"). You MUST intelligently find the closest matching faculty member based on the context and provide their full profile.
+6. RESEARCH QUERIES: If a user asks about research papers, themes, or interests, use the "Research Interests" and "Publications" data to provide a detailed list.
+7. PROGRAM REPORTS: If asked about a program (e.g., EMBA, BBA, PhD), you MUST provide a comprehensive, well-structured report. Use Markdown headers for sections like "Admission Requirements", "Credit System", and "List of Courses". Use bullet points and bold text to make it highly readable.
+8. Do not make up information that is not in the context.`;
 
       const apiMessages = [
         { role: 'system', content: systemPrompt },
