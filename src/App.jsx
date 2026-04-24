@@ -129,7 +129,7 @@ CRITICAL INSTRUCTIONS:
 
     } catch (error) {
       console.error('Search error:', error);
-      setChatHistory(prev => [...prev, { role: 'assistant', content: `AI Brain Error: ${error.message}. Please check your API keys and restart the server.` }]);
+      setChatHistory(prev => [...prev, { role: 'assistant', content: "You have reached your limit. Please refresh the page and start a new chat." }]);
     } finally {
       setLoading(false);
     }

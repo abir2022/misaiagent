@@ -42,7 +42,9 @@ body {
   font-family: 'Outfit', 'Inter', sans-serif;
   background: var(--bg-gradient);
   color: var(--text-primary);
-  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: var(--transition);
@@ -63,6 +65,7 @@ body {
   z-index: -1;
   overflow: hidden;
   perspective: 1000px;
+  pointer-events: none; /* Ensure background doesn't block scrolling/clicks */
 }
 
 .floating-object {
@@ -84,12 +87,13 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 1;
+  height: 100vh;
   width: 100%;
   padding: 1.5rem;
   max-width: 1200px;
   margin: 0 auto;
   position: relative;
+  overflow: hidden;
 }
 
 /* Header Refined */

@@ -1,0 +1,2 @@
+# Store the token securely in the Windows Credential Manager
+git config --global credential.helper manager-core
