@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './index.css';
-import logo from '../DU logo.png';
+import logo from '../assets/du-logo.png';
 
 function App() {
   const [query, setQuery] = useState('');
