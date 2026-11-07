@@ -1,3 +1,5 @@
+![misaiagent](assets/banner.svg)
+
 # misaiagent — ask a university department's database a question in plain English
 
 A small, fast question-answering layer over a department's MIS data: teachers, programs, courses and departments. Instead of a search form with six dropdowns, you type *"who teaches database systems this term?"* and get an answer grounded in the actual rows.
